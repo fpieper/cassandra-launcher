@@ -134,7 +134,7 @@ class Loader(
     }
 
     private fun launch() {
-        println("Launch Cassandra ...")
+        println("Launching Cassandra ...")
         runningProcess = ProcessBuilder(
             javaPath,
             *(launchArguments.split(" ").toTypedArray())
@@ -145,7 +145,7 @@ class Loader(
     }
 
     fun shutdown() {
-        println("Shutdown Cassandra ...")
+        println("Shutting down Cassandra ...")
         runningProcess?.destroy()
     }
 }

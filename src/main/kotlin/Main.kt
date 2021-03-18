@@ -16,7 +16,7 @@ suspend fun main(args: Array<String>) {
     val loader = Loader(repository, console, checkDelay.toLong(), launchDelay.toLong())
     Runtime.getRuntime().addShutdownHook(Thread {
         loader.shutdown()
-        println("Shutdown Cassandra Loader ...")
+        println("Shutting down Cassandra Loader ...")
     })
     loader.loop()
 }
