@@ -17,7 +17,7 @@ sudo apt-get install openjdk-11-jre
 ## One-Liner (pre-built)
 Create an empty working directory first like ``mkdir -p ~/cassandra`` or ``mkdir -p /opt/cassandra`` (recommend)
 
-Replace ``<url>`` with the url of the Cassandra repository. 
+Replace ``<url>`` with the url of the repository containing the launch configuration, and the JAR. 
 ````
 rm -f cassandra-loader-1.0-all.jar \
 && wget https://github.com/fpieper/cassandra-loader/releases/download/1.0/cassandra-loader-1.0-all.jar \
