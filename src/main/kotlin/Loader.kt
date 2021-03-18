@@ -9,6 +9,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.*
 import java.io.File
 import java.nio.channels.UnresolvedAddressException
+import java.nio.file.Paths
 
 
 val client = HttpClient(CIO) {
@@ -35,13 +36,13 @@ suspend fun fetchEtags(urls: List<String>): List<String> {
     return emptyList()
 }
 
-suspend fun downloadFiles(urls: List<String>): Boolean {
+suspend fun downloadFiles(urls: List<String>, destination: File): Boolean {
     try {
         val contents = urls.map{
             Pair(it.split("/").last(), client.get<ByteArray>(it))
         }
         for ((fileName, content) in contents) {
-            val file = File(fileName)
+            val file = Paths.get(destination.name, fileName).toFile()
             file.writeBytes(content)
         }
         return true
@@ -70,6 +71,7 @@ class Loader(
     private val repository: String = repository.trimEnd('/')
     private val configFileName = "default.config"
     private val jarFileName = "hackation.jar"
+    private val workdir = File("cassandra-node")
     private val urls = listOf(this.repository + "/$configFileName", this.repository + "/$jarFileName")
     private val javaPath = getJavaPath()
     private val launchArguments = "-jar $jarFileName -config $configFileName${if (enableConsole) " -console" else ""}"
@@ -112,6 +114,8 @@ class Loader(
     }
 
     private suspend fun prepareLaunch(etags: List<String>): Boolean {
+        workdir.deleteRecursively()
+        workdir.mkdirs()
         for (second in (launchDelay / 1000) downTo 1) {
             println("Waiting $second seconds to prepare launch ...")
             delay(1000)
@@ -120,7 +124,7 @@ class Loader(
             return false
         }
         println("Loading configuration and jar ...")
-        if (!downloadFiles(urls)) {
+        if (!downloadFiles(urls, workdir)) {
             return false
         }
         if (etags != fetchEtags(urls)) {
@@ -134,7 +138,10 @@ class Loader(
         runningProcess = ProcessBuilder(
             javaPath,
             *(launchArguments.split(" ").toTypedArray())
-        ).inheritIO().start()
+        )
+            .inheritIO()
+            .directory(workdir)
+            .start()
     }
 
     fun shutdown() {
