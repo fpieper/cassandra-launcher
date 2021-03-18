@@ -62,7 +62,7 @@ fun getJavaPath(): String {
     return if (System.getProperty("os.name").startsWith("Win")) "$path.exe" else path
 }
 
-class Loader(
+class Launcher(
     repository: String,
     enableConsole: Boolean,
     private val checkDelay: Long,

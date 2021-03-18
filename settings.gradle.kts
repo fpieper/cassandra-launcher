@@ -1,1 +1,1 @@
-rootProject.name = "cassandra-loader"
+rootProject.name = "cassandra-launcher"

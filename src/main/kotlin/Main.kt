@@ -13,7 +13,7 @@ suspend fun main(args: Array<String>) {
     val checkDelay by parser.option(ArgType.Int, shortName = "d", description = "Check delay").default(3000)
     val launchDelay by parser.option(ArgType.Int, shortName = "l", description = "Launch delay").default(15000)
     parser.parse(args)
-    val loader = Loader(repository, console, checkDelay.toLong(), launchDelay.toLong())
+    val loader = Launcher(repository, console, checkDelay.toLong(), launchDelay.toLong())
     Runtime.getRuntime().addShutdownHook(Thread {
         loader.shutdown()
         println("Shutting down Cassandra Loader ...")
