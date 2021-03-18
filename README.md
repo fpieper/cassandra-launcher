@@ -15,7 +15,7 @@ sudo apt-get install openjdk-11-jre
 
 
 ## One-Liner (pre-built)
-Create an empty working directory first like ``mkdir -p ~/cassandra`` or ``mkdir -p /opt/cassandra`` (recommend)
+Create an empty working directory first like ``mkdir -p ~/cassandra`` or ``mkdir -p /opt/cassandra``.
 
 Replace ``<url>`` with the url of the repository containing the launch configuration, and the JAR. 
 ````
