@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ai.pieper"
-version = "1.0"
+version = "1.0.1"
 
 application {
     mainClass.set("ai.pieper.MainKt")

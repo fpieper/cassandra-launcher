@@ -12,13 +12,7 @@ import java.nio.channels.UnresolvedAddressException
 import java.nio.file.Paths
 
 
-val client = HttpClient(CIO) {
-    install(HttpTimeout) {
-        requestTimeoutMillis = 10000
-    }
-}
-
-suspend fun fetchEtags(urls: List<String>): List<String> {
+suspend fun fetchEtags(urls: List<String>, client: HttpClient): List<String> {
     try {
         val etags = urls.map { client.head<HttpResponse>(it).etag() }
         if (etags.contains(null)) {
@@ -36,7 +30,7 @@ suspend fun fetchEtags(urls: List<String>): List<String> {
     return emptyList()
 }
 
-suspend fun downloadFiles(urls: List<String>, destination: File): Boolean {
+suspend fun downloadFiles(urls: List<String>, destination: File, client: HttpClient): Boolean {
     try {
         val contents = urls.map{
             Pair(it.split("/").last(), client.get<ByteArray>(it))
@@ -65,8 +59,8 @@ fun getJavaPath(): String {
 class Launcher(
     repository: String,
     enableConsole: Boolean,
-    private val checkDelay: Long,
-    private val launchDelay: Long
+    private val interval: Long,
+    private val timeout: Long
 ) {
     private val repository: String = repository.trimEnd('/')
     private val configFileName = "default.config"
@@ -77,19 +71,31 @@ class Launcher(
     private val launchArguments = "-jar $jarFileName -config $configFileName${if (enableConsole) " -console" else ""}"
     private var runningProcess: Process? = null
 
+    private val client = HttpClient(CIO) {
+        install(HttpTimeout) {
+            requestTimeoutMillis = timeout
+        }
+        engine {
+            endpoint {
+                connectTimeout = 5000
+                connectAttempts = 5
+            }
+        }
+    }
+
     private val isRunning: Boolean
         get() = runningProcess?.isAlive == true
 
     suspend fun loop() {
         var previousEtags: List<String> = emptyList()
         while (true) {
-            val newEtags = fetchEtags(urls)
+            val newEtags = fetchEtags(urls, client)
             previousEtags = if (isRunning) {
                 handleRunning(previousEtags, newEtags)
             } else {
                 handleNotRunning(newEtags)
             }
-            delay(checkDelay)
+            delay(interval)
         }
     }
 
@@ -116,18 +122,19 @@ class Launcher(
     private suspend fun prepareLaunch(etags: List<String>): Boolean {
         workdir.deleteRecursively()
         workdir.mkdirs()
-        for (second in (launchDelay / 1000) downTo 1) {
+        val waitingDelay = (timeout * 1.5).toLong()
+        for (second in (waitingDelay / 1000) downTo 1) {
             println("Waiting $second seconds to prepare launch ...")
             delay(1000)
         }
-        if (etags != fetchEtags(urls)) {
+        if (etags != fetchEtags(urls, client)) {
             return false
         }
         println("Loading configuration and jar ...")
-        if (!downloadFiles(urls, workdir)) {
+        if (!downloadFiles(urls, workdir, client)) {
             return false
         }
-        if (etags != fetchEtags(urls)) {
+        if (etags != fetchEtags(urls, client)) {
             return false
         }
         return true

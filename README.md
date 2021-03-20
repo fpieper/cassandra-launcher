@@ -19,9 +19,9 @@ Create an empty working directory first like ``mkdir -p ~/cassandra`` or ``mkdir
 
 Replace ``<url>`` with the url of the repository containing the launch configuration, and the JAR. 
 ````
-rm -f cassandra-launcher-1.0-all.jar \
-&& wget https://github.com/fpieper/cassandra-launcher/releases/download/1.0/cassandra-launcher-1.0-all.jar \
-&& java -jar cassandra-launcher-1.0-all.jar --repository <url> --console
+rm -f cassandra-launcher-1.0.1-all.jar \
+&& wget https://github.com/fpieper/cassandra-launcher/releases/download/1.0.1/cassandra-launcher-1.0.1-all.jar \
+&& java -jar cassandra-launcher-1.0.1-all.jar --repository <url> --console
 ````
 
 ## Build
@@ -29,7 +29,7 @@ rm -f cassandra-launcher-1.0-all.jar \
 git clone https://github.com/fpieper/cassandra-launcher.git
 cd cassandra-launcher
 sh gradlew build
-java -jar build/libs/cassandra-launcher-1.0-all.jar --repository <url> --console
+java -jar build/libs/cassandra-launcher-1.0.1-all.jar --repository <url> --console
 ````
 
 ## Usage
